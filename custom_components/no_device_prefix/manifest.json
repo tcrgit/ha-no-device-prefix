@@ -1,0 +1,12 @@
+{
+  "domain": "no_device_prefix",
+  "name": "No Device Prefix",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": ["frontend", "http"],
+  "documentation": "https://github.com",
+  "integration_type": "system",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/issues",
+  "version": "2.0.0"
+}

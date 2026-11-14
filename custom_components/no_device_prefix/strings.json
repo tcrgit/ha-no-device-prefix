@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "No Device Prefix",
+        "description": "Enable the frontend patch to strip prepended device names from entity labels across dashboards and dialogs."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Already configured. Only a single instance is allowed."
+    }
+  }
+}
