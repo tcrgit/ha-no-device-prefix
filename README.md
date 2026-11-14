@@ -22,12 +22,11 @@ Because this runs entirely in the browser/Companion App presentation layer, your
 
 ### Option 1: Home Assistant Marketplace / HACS (Recommended)
 
-1. Open **Settings > Marketplace** in Home Assistant (or **HACS** if you are on 2026.10 or older).
-2. Click the **three dots** in the top-right corner and select **Custom repositories**.
-3. Paste the URL of this repository (`https://github.com/tcrgit/ha-no-device-prefix`), select **Integration** as the category, and click **Add**.
-4. Find **No Device Prefix** and click **Download**.
-5. **Restart Home Assistant** (a full Core restart is required).
-6. **Clear your frontend cache:**
+1. Open **Settings > Marketplace** (or **HACS** on `2026.10` and older), click the **three dots** in the top-right corner > **Custom repositories**, and add `https://github.com` as an **Integration**.
+2. Click **Install / Download** on **No Device Prefix**:
+   * **On `2026.11+` (Marketplace):** Click the **Setup** button (or follow the automatic setup prompt) to enable it immediately—no restart required.
+   * **On `2026.10` or older (HACS):** Restart Home Assistant, then go to **Settings > Devices & Services > + Add Integration**, search for **No Device Prefix**, and submit.
+3. **Clear your frontend cache:**
    * **Desktop Browser:** Hard-refresh (`Ctrl + Shift + R` or `Cmd + Shift + R`).
    * **iOS / Android Companion App:** Go to **Settings > Companion App > Debugging > Reset frontend cache**, then force-close and reopen the app.
 
