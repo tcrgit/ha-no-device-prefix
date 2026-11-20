@@ -1,8 +1,10 @@
 # No Device Prefix (Home Assistant `2026.11+`)
 
-A lightweight frontend patch for Home Assistant restoring the shorter display labels to how they appeared in `2026.10.4` and prior versions. This plugin alters the entity display naming behavior introduced in `2026.11.0` by **stripping prepended device names from entity labels** on auto-generated dashboards, entity pickers, and More Info dialogs.
+A lightweight frontend patch for Home Assistant **restoring the shorter display labels** to how they appeared in `2026.10.4` and prior versions.
 
-Version 2.1 adds per-device **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature).*
+This plugin alters the entity display naming behavior introduced in `2026.11.0` by stripping prepended device names from entity labels on dashboards, entity pickers, and More Info dialogs. This applies **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular entity (i.e. a specific sensor or switch).
+
+Version 2.1 adds per-device **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
 
 ---
 
@@ -24,7 +26,7 @@ Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic
 ## Installation
 
 1. **Marketplace / HACS (Recommended):**
-   * Open **Settings > Marketplace** (or **HACS**), click the **three dots (`...`)** in the top-right corner > **Custom repositories**, and add `[YOUR-GITHUB-REPO-URL]` as an **Integration**.
+   * Open **Settings > Marketplace** (or **HACS**), click the **three dots (`...`)** in the top-right corner > **Custom repositories**, and add `https://github.com/tcrgit/ha-no-device-prefix` as an **Integration**.
    * Install **No Device Prefix** and click **Setup** (or restart Home Assistant and add it via **Settings > Devices & Services > + Add Integration** on `2026.10` and older).
 2. **Manual:**
    * Copy `custom_components/no_device_prefix` into your `/config/custom_components/` directory and **Restart Home Assistant**.
