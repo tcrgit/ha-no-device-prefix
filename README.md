@@ -8,11 +8,15 @@ Version 2.1 adds per-device **Opt-Out** and **Opt-In** controls. As a plugin, it
 
 ---
 
-## Example of Why This Exists
+## Why This Exists and What This Fixes
 
 Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multi-sensor devices:
 * **Before (`2026.11` default):** `GW1000_Pro Indoor Temperatur...`, `GW1000_Pro Indoor Humidity`
 * **With No Device Prefix:** `Indoor Temperature`, `Indoor Humidity`
+
+| Before (`2026.11` Default) | After (`No Device Prefix`) |
+| :---: | :---: |
+| ![Before](images/Ecowitt_11.x_small.png) | ![After](images/Ecowitt_plugin_small.png) |
 
 ---
 
@@ -20,6 +24,7 @@ Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic
 
 * **Presentation-Layer Only:** Intercepts `hass.entities` and `hass.states` in the browser and Companion App; underlying `entity_id`s, SQLite history, and automations remain untouched.
 * **Primary-Entity Guard:** Primary or standalone entities whose name *is* the device itself (where the entity has no separate sub-name) retain their device name to prevent generic labels like `Switch` or `Light`.
+* **Custom Entity Names Preserved:** Entities you have explicitly renamed in the GUI keep their custom names as-is—unless the custom name literally starts with the device name, in which case that redundant prefix is still stripped.
 
 ---
 
@@ -40,18 +45,22 @@ Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic
 Upon installation, the integration automatically creates two device labels under **Settings > Areas, labels & zones > Labels**: **`keep-prefix`** and **`omit-prefix`**.
 
 ### 1. Switching Global Modes (Opt-Out vs. Opt-In)
-1. Go to **Settings > Devices & Services** and select **No Device Prefix**.
+1. Go to **Settings > Devices & Services** and select the **No Device Prefix** integration.
 2. Click the **gear icon (`⚙️`)** (or **Configure**).
 3. Toggle **"Opt-In mode only"**:
    * **Unchecked — Opt-Out Mode (Default):** Strips prefixes automatically on all entities that have their own sub-name. Use **`keep-prefix`** on any device whose full name should be preserved (such as generic room sensors).
    * **Checked — Opt-In Mode:** Leaves all names in the post-`2026.11` display format by default. Use **`omit-prefix`** only on noisy multi-sensor devices you want cleaned up.
 4. Refresh any open dashboard tabs (`Ctrl + R` or `Cmd + R`) to apply the new mode.
 
+![Toggling the global opt out option in Settings -> Devices and Services -> Integration -> No Device Prefix](images/integration-global.png)
+
 ### 2. Applying Labels to Specific Devices
 1. Go to **Settings > Devices & Services > Devices** and open the device you want to configure.
 2. Click the **pencil icon (`✎`)** in the top-right corner of the device page.
 3. Click into the **Labels** dropdown and select **`keep-prefix`** or **`omit-prefix`**, then click **Update**.
 4. Refresh your dashboard tab (`Ctrl + R` or `Cmd + R`) to see the updated labels.
+
+![Applying keep-prefix or omit-prefix in Device Settings](images/device-labels.png)
 
 *(Tip: If you prefer more descriptive labels or the automatically generated ones do not appear, you can create or use any of the following patterns: `Keep Prefix`, `keep-prefix`, `keep-device-prefix`, `Omit Prefix`, `omit-prefix`, `omit-device-prefix`, `no-prefix`, and `no-device-prefix` all work interchangeably. The plugin's label matching function ignores case, spaces, hyphens, and underscores).*
 
