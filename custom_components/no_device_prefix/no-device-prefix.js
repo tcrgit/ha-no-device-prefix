@@ -1,11 +1,34 @@
 /**
- * Home Assistant Frontend Plugin: No Device Prefix (v2.0 - Universal)
+ * Home Assistant Frontend Plugin: No Device Prefix (v2.1.0)
  * Restores pre-2026.11 entity naming behavior by preventing redundant
  * device name concatenation on device entities while preserving
  * standalone device names.
+ *
+ * Supported Device Labels (spaces, hyphens, underscores, or none):
+ *   - Keep prefix : keep-prefix, keep-device-prefix (and spaced/underscored equivalents)
+ *   - Omit prefix : omit-prefix, omit-device-prefix, no-prefix, no-device-prefix
  */
 (function () {
   const PLUGIN_NAME = "No Device Prefix";
+  const STORAGE_KEY = "ndp_opt_in_mode";
+
+  const KEEP_LABELS = new Set([
+    "keepprefix",
+    "keepdeviceprefix",
+  ]);
+
+  const OMIT_LABELS = new Set([
+    "omitprefix",
+    "omitdeviceprefix",
+    "noprefix",
+    "nodeviceprefix",
+  ]);
+
+  let optInMode = localStorage.getItem(STORAGE_KEY) === "true";
+
+  function normalizeLabel(label) {
+    return String(label).toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
 
   function stripLiteralPrefix(text, prefixes) {
     if (!text) return text;
@@ -34,6 +57,20 @@
       const device = devices[entityMeta.device_id];
       if (!device) continue;
 
+      const labels = (device.labels || []).map(normalizeLabel);
+      const hasKeep = labels.some((l) => KEEP_LABELS.has(l));
+      const hasOmit = labels.some((l) => OMIT_LABELS.has(l));
+
+      // 1. Explicit keep label always wins
+      if (hasKeep) {
+        continue;
+      }
+
+      // 2. In Opt-In mode, skip any device that lacks an omit/no-prefix label
+      if (optInMode && !hasOmit) {
+        continue;
+      }
+
       const deviceNames = [device.name_by_user, device.name].filter(Boolean);
       if (deviceNames.length === 0) continue;
 
@@ -41,13 +78,12 @@
       const rawFriendly = stateObj?.attributes?.friendly_name || "";
       const rawMetaName = entityMeta.name || entityMeta.original_name;
 
-      // If the entity has no sub-name of its own (e.g., a single-switch device where
-      // the entity name is null), keep the device name so it doesn't render blank.
-      if (!rawMetaName && deviceNames.includes(rawFriendly)) {
+      // 3. Protect standalone single-entity devices unless explicitly forced via label
+      if (!hasOmit && !rawMetaName && deviceNames.includes(rawFriendly)) {
         continue;
       }
 
-      // 1. Strip literal device prefix if baked into friendly_name or entity name
+      // 4. Strip literal device prefix if baked into friendly_name or entity name
       const cleanedFriendly = stripLiteralPrefix(rawFriendly, deviceNames);
       if (cleanedFriendly !== rawFriendly && stateObj?.attributes) {
         stateObj.attributes = {
@@ -60,7 +96,7 @@
         ? stripLiteralPrefix(rawMetaName, deviceNames)
         : rawMetaName;
 
-      // 2. Disable 2026.11's automatic device prefix concatenation (next_name_part)
+      // 5. Disable 2026.11's automatic device prefix concatenation (next_name_part)
       if (
         cleanedMetaName !== rawMetaName ||
         entityMeta.next_name_part === "device"
@@ -72,6 +108,28 @@
           next_name_part: undefined,
         };
       }
+    }
+  }
+
+  async function syncSettings(main) {
+    try {
+      const resp = await fetch("/no_device_prefix/settings.json", {
+        cache: "no-store",
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const serverOptIn = Boolean(data.opt_in_mode);
+
+      if (serverOptIn !== optInMode) {
+        optInMode = serverOptIn;
+        localStorage.setItem(STORAGE_KEY, String(optInMode));
+        if (main?.hass) {
+          cleanHassData(main.hass);
+          main.requestUpdate("hass");
+        }
+      }
+    } catch (err) {
+      console.warn(`[${PLUGIN_NAME}] Could not fetch settings:`, err);
     }
   }
 
@@ -110,8 +168,11 @@
       main.requestUpdate("hass");
     }
 
+    syncSettings(main);
     main.__noDevicePrefixPatched = true;
-    console.info(`[${PLUGIN_NAME}] Universal interceptor active (v2.0).`);
+    console.info(
+      `[${PLUGIN_NAME}] Active (v2.1.0, mode=${optInMode ? "opt-in" : "opt-out"}).`
+    );
   }
 
   function init() {
