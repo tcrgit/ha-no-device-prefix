@@ -1,60 +1,72 @@
-# No Device Prefix (Home Assistant Frontend Patch)
+# No Device Prefix (Home Assistant `2026.11+`)
 
-A lightweight frontend patch that restores pre-2026.11 entity display naming behavior in Home Assistant by stripping prepended device names from entity labels on generated automatic dashboards, entity lists, and More Info dialogs—effectively undoing at elast some of the UI display label bugs introduced in **`home-assistant/frontend#54727`** (and discussed in **`frontend#55664`**), where labels are now unreadable and unusable due to the forced concatenation of the device name prior to the entity name/label.
+A lightweight frontend patch for Home Assistant restoring the shorter display labels to how they appeared in `2026.10.4` and prior versions. This plugin alters the entity display naming behavior introduced in `2026.11.0` by **stripping prepended device names from entity labels** on auto-generated dashboards, entity pickers, and More Info dialogs.
 
-Because this runs entirely in the browser/Companion App presentation layer, your underlying entity IDs, database history, automations, and voice assistant names remain completely untouched. However, it also may not fix some bugs in the 11.0 release creating such problems.
+Version 2.1 adds per-device **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature).*
 
 ---
 
-## ⚠️ Important Caveats & Warnings
+## Example of Why This Exists
 
-1. **Slightly Aggressive Stripping:** 
-   This is a generic, work-in-progress patch and can occasionally be a bit too aggressive—for example, stripping device names from generic single-word sensors (like a bare `Humidity` or `Illuminance` entity) on multi-device Area cards where keeping the device name would have been helpful. This may be the result of some database changes and/or core entity renaming.
-2. **No Per Device Toggle Yet:**
-   If the HA devs do not address this problem systematically, I may eventually add a per device (or possibly a sensor/switch/entity) toggle to the front end GUI to omit the device name prepending. 
-3. **Hold Off on Upgrading to 2026.11.0 (InfluxDB Breaking Bug):** 
-   If you have not upgraded yet, **do not upgrade your production system to `2026.11.0`**—and if you already have, consider **rolling back to `2026.10.4`** if you have a backup. Beyond the UI prefix changes, `2026.11.0` introduced a separate, unfixed bug affecting **InfluxDB** caused by automatic device and entity renaming, which can break long-term historical data continuity. 
-   *(Note: Because of this InfluxDB issue, I am keeping my own production installation on `2026.10.4` for now, so live testing on `2026.11+` is limited. Pull requests, bug reports, and feedback from those running `2026.11` are very welcome!)*
+Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multi-sensor devices:
+* **Before (`2026.11` default):** `GW1000_Pro Indoor Temperatur...`, `GW1000_Pro Indoor Humidity`
+* **With No Device Prefix:** `Indoor Temperature`, `Indoor Humidity`
+
+---
+
+## How It Works
+
+* **Presentation-Layer Only:** Intercepts `hass.entities` and `hass.states` in the browser and Companion App; underlying `entity_id`s, SQLite history, and automations remain untouched.
+* **Primary-Entity Guard:** Primary or standalone entities whose name *is* the device itself (where the entity has no separate sub-name) retain their device name to prevent generic labels like `Switch` or `Light`.
 
 ---
 
 ## Installation
 
-### Option 1: Home Assistant Marketplace / HACS (Recommended)
-
-1. Open **Settings > Marketplace** (or **HACS** on `2026.10` and older), click the **three dots** in the top-right corner > **Custom repositories**, and add `https://github.com` as an **Integration**.
-2. Click **Install / Download** on **No Device Prefix**:
-   * **On `2026.11+` (Marketplace):** Click the **Setup** button (or follow the automatic setup prompt) to enable it immediately—no restart required.
-   * **On `2026.10` or older (HACS):** Restart Home Assistant, then go to **Settings > Devices & Services > + Add Integration**, search for **No Device Prefix**, and submit.
-3. **Clear your frontend cache:**
-   * **Desktop Browser:** Hard-refresh (`Ctrl + Shift + R` or `Cmd + Shift + R`).
-   * **iOS / Android Companion App:** Go to **Settings > Companion App > Debugging > Reset frontend cache**, then force-close and reopen the app.
-
-### Option 2: Manual Custom Component
-
-1. Copy the `custom_components/no_device_prefix/` directory into your Home Assistant `/config/custom_components/` folder.
-2. Add `no_device_prefix:` to your `configuration.yaml`.
-3. **Restart Home Assistant** and clear your browser/Companion App frontend cache as described above.
-
-### Option 3: Standalone Lovelace Resource
-
-1. Copy `custom_components/no_device_prefix/no-device-prefix.js` to `/config/www/no-device-prefix.js`.
-2. In Home Assistant, go to **Settings > Dashboards**, click the **three dots** in the top right, and select **Resources**.
-3. Click **Add Resource**, enter `/local/no-device-prefix.js`, select **JavaScript Module**, and click **Create**.
-4. Hard-refresh your browser or reset your Companion App frontend cache.
+1. **Marketplace / HACS (Recommended):**
+   * Open **Settings > Marketplace** (or **HACS**), click the **three dots (`...`)** in the top-right corner > **Custom repositories**, and add `[YOUR-GITHUB-REPO-URL]` as an **Integration**.
+   * Install **No Device Prefix** and click **Setup** (or restart Home Assistant and add it via **Settings > Devices & Services > + Add Integration** on `2026.10` and older).
+2. **Manual:**
+   * Copy `custom_components/no_device_prefix` into your `/config/custom_components/` directory and **Restart Home Assistant**.
+   * Go to **Settings > Devices & Services > + Add Integration**, search for **No Device Prefix**, and submit.
+3. **Clear your frontend cache** (see [Clearing Frontend Cache](#clearing-frontend-cache) below).
 
 ---
 
-## Verification
+## Usage & Controls (`v2.1.0+`)
 
-Open your browser's Developer Console (`F12` or `Cmd + Option + I`). You should see:
-```text
-[No Device Prefix] Universal interceptor active (v2.0).
-```
+Upon installation, the integration automatically creates two device labels under **Settings > Areas, labels & zones > Labels**: **`keep-prefix`** and **`omit-prefix`**.
+
+### 1. Switching Global Modes (Opt-Out vs. Opt-In)
+1. Go to **Settings > Devices & Services** and select **No Device Prefix**.
+2. Click the **gear icon (`⚙️`)** (or **Configure**).
+3. Toggle **"Opt-In mode only"**:
+   * **Unchecked — Opt-Out Mode (Default):** Strips prefixes automatically on all entities that have their own sub-name. Use **`keep-prefix`** on any device whose full name should be preserved (such as generic room sensors).
+   * **Checked — Opt-In Mode:** Leaves all names in the post-`2026.11` display format by default. Use **`omit-prefix`** only on noisy multi-sensor devices you want cleaned up.
+4. Refresh any open dashboard tabs (`Ctrl + R` or `Cmd + R`) to apply the new mode.
+
+### 2. Applying Labels to Specific Devices
+1. Go to **Settings > Devices & Services > Devices** and open the device you want to configure.
+2. Click the **pencil icon (`✎`)** in the top-right corner of the device page.
+3. Click into the **Labels** dropdown and select **`keep-prefix`** or **`omit-prefix`**, then click **Update**.
+4. Refresh your dashboard tab (`Ctrl + R` or `Cmd + R`) to see the updated labels.
+
+*(Tip: If you prefer more descriptive labels or the automatically generated ones do not appear, you can create or use any of the following patterns: `Keep Prefix`, `keep-prefix`, `keep-device-prefix`, `Omit Prefix`, `omit-prefix`, `omit-device-prefix`, `no-prefix`, and `no-device-prefix` all work interchangeably. The plugin's label matching function ignores case, spaces, hyphens, and underscores).*
 
 ---
 
-## Feedback & Contributions
+## Clearing Frontend Cache
 
-If you are running `2026.11+` and notice edge cases where prefixes are stripped too aggressively or missed entirely, please open an issue or submit a PR with examples of the entity's `entity_id`, `device.name`, and `friendly_name`.
+Whenever you first install the plugin or update to a new version, clear your client cache so the new JavaScript module loads:
+* **Desktop Browser:** Hard-refresh the page (`Ctrl + Shift + R` on Windows/Linux, `Cmd + Shift + R` on Mac).
+* **iOS / Android Companion App:** Go to **Settings > Companion App > Debugging > Reset frontend cache**, then force-close and reopen the app.
 
+---
+
+## Caveats & Troubleshooting
+
+* **External APIs & InfluxDB:** Because this patch runs in the browser, backend `friendly_name` attributes remain visible to HomeKit, Alexa, Google Assistant, and external InfluxDB integrations (`tags_attributes: friendly_name`). Home Assistant's built-in SQLite Recorder indexes by `entity_id` and is completely unaffected.
+* **Troubleshooting:** Open your browser's Developer Tools (`F12` or `Cmd + Option + I`) and check the Console for:
+  ```text
+  [No Device Prefix] Active (v2.1.0, mode=opt-out).
+  ```
