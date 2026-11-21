@@ -55,10 +55,12 @@ Upon installation, the integration automatically creates two device labels under
 ![Toggling the global opt out option in Settings -> Devices and Services -> Integration -> No Device Prefix](images/integration-global.png)
 
 ### 2. Applying Labels to Specific Devices
-1. Go to **Settings > Devices & Services > Devices** and open the device you want to configure.
+1. Go to **Settings > Devices & Services > Devices** and open the **device** you want to configure.
 2. Click the **pencil icon (`✎`)** in the top-right corner of the device page.
 3. Click into the **Labels** dropdown and select **`keep-prefix`** or **`omit-prefix`**, then click **Update**.
 4. Refresh your dashboard tab (`Ctrl + R` or `Cmd + R`) to see the updated labels.
+
+*Note: Adding the `keep-prefix` or `omit-prefix` label to the entity (i.e. the switch or sensor) does nothing. The label must be attached to the **device**.*
 
 ![Applying keep-prefix or omit-prefix in Device Settings](images/device-labels.png)
 
