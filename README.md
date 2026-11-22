@@ -1,18 +1,18 @@
 # No Device Prefix (Home Assistant `2026.11+`)
 
-A lightweight frontend patch for Home Assistant **restoring the shorter display labels** to how they appeared in `2026.10.4` and prior versions.
+A lightweight frontend patch for Home Assistant **restoring shorter dashboard rows**,  displaying switches and sensor names as they appeared in `2026.10.4` and prior versions.
 
-This plugin alters the entity display naming behavior introduced in `2026.11.0` by stripping prepended device names from entity labels on dashboards, entity pickers, and More Info dialogs. This applies **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular entity (i.e. a specific sensor or switch).
+This custom integration alters the entity display naming behavior introduced in `2026.11.0` by stripping the prepended device names from entity labels on dashboards, entity pickers, and More Info dialogs. This applies **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular sensor or switch entity. It primarily operates on legacy dashboard templates and has minimal affect on post `2026.2` Home Dashboard templates (although it does fix the Favorites row).
 
-Version 2.1 adds per-device **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
+Version 2.1 adds **per-device** and **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
 
 ---
 
 ## Why This Exists and What This Fixes
 
-Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multi-sensor devices:
-* **Before (`2026.11` default):** `GW1000_Pro Indoor Temperatur...`, `GW1000_Pro Indoor Humidity`
-* **With No Device Prefix:** `Indoor Temperature`, `Indoor Humidity`
+Home Assistant `2026.11.0` (`frontend#54727` / `frontend#55664`) removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multisensor devices:
+* **The new `2026.11` behavior:** `GW1000_Pro Indoor Temperatur...`, `GW1000_Pro Indoor Humidity`
+* **After No Device Prefix installed:** `Indoor Temperature`, `Indoor Humidity`
 
 | Before (`2026.11` Default) | After (`No Device Prefix`) |
 | :---: | :---: |
@@ -40,7 +40,7 @@ Home Assistant `2026.11` (`frontend#54727` / `frontend#55664`) removed automatic
 
 ---
 
-## Usage & Controls (`v2.1.0+`)
+## Usage & Controls
 
 Upon installation, the integration automatically creates two device labels under **Settings > Areas, labels & zones > Labels**: **`keep-prefix`** and **`omit-prefix`**.
 
