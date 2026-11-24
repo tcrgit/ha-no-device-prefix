@@ -70,7 +70,7 @@ Upon installation, the integration automatically creates two device labels under
 
 ## Clearing Frontend Cache
 
-Whenever you first install the plugin or update to a new version, clear your client cache so the new JavaScript module loads:
+Whenever you first install the integration or update to a new version, clear your client cache so the new JavaScript module loads:
 * **Desktop Browser:** Hard-refresh the page (`Ctrl + Shift + R` on Windows/Linux, `Cmd + Shift + R` on Mac).
 * **iOS / Android Companion App:** Go to **Settings > Companion App > Debugging > Reset frontend cache**, then force-close and reopen the app.
 
