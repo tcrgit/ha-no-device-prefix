@@ -2,9 +2,9 @@
 
 A lightweight frontend patch for Home Assistant **restoring shorter dashboard rows**,  displaying switches and sensor names as they appeared in `2026.10.4` and prior versions.
 
-This custom integration alters the entity display naming behavior introduced in `2026.11.0` (which now prepends the device name to the entity name) by stripping out the `2026.11.0` prepended device names from the entity labels on dashboards, entity pickers, and More Info dialogs. (I.e., it **reverses** the change).
+This custom integration alters the entity display naming behavior introduced in `2026.11.0` (which now prepends the device name to the entity name) by stripping out the `2026.11.0` prepended device names from the entity labels on dashboards, entity pickers, and More Info dialogs. (I.e., it **reverses** the new default naming behavior-which was itself *a reversal of the old default naming behavior*).
 
-It works well on **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular sensor or switch entity. It primarily operates on those two types of dashboards; it has minimal affect on post `2026.2` Home Dashboard templates (although it does fix the Favorites row). Home Dashboard appears unaffected by this plugin, but it I have not yet tested it extensively against those templates.
+It works well on **both** auto-generated dashboards/dashboard cards and on custom dashboard cards without an overriding `name:` field in the YAML for a particular sensor or switch entity. It primarily operates on those two types of dashboards; it has minimal affect on post `2026.2` Home Dashboard templates (although it does fix the Favorites row). Home Dashboard appears unaffected by this plugin, but it I have not yet tested it extensively against those templates.
 
 Version 2.1 adds **per-device** and **Opt-Out** / **Opt-In** controls. As it is currently a non-standard custom integration, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
 
