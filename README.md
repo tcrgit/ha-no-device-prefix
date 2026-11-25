@@ -42,8 +42,8 @@ Upon installation, the integration automatically creates two device labels under
 1. Go to **Settings > Devices & Services** and select the **No Device Prefix** integration.
 2. Click the **gear icon (`⚙️`)** (or **Configure**).
 3. Toggle **"Opt-In mode only"**:
-   * **Unchecked — Opt-Out Mode (Default):** Strips prefixes automatically on all entities that have their own sub-name. Use **`keep-prefix`** on any device whose full name should be preserved. This reverses the new naming behavior system-wide and allows you to keep the prefix prepending on a per device basis.
-   * **Checked — Opt-In Mode:** Leaves all names in the post-`2026.11` display format by default. Use **`omit-prefix`** only on the multi-sensor (or other) devices you want to restore to their shortened display in the dashboard. This **keeps** the new naming behavior system-wide and allows you to omit the prefix prepending on a per device basis.
+   * **Unchecked — Opt-Out Mode (Default):** Strips prefixes automatically on all entities that have their own sub-name. Use **`keep-prefix`** on any device whose full name should be preserved. This **reverses** the new naming behavior system-wide and allows you to keep the prefix prepending on a per-device basis.
+   * **Checked — Opt-In Mode:** Leaves all names in the post-`2026.11` display format by default. Use **`omit-prefix`** only on the multi-sensor (or other) devices you want to restore to their shortened display in the dashboard. This **keeps** the new naming behavior system-wide and allows you to omit the prefix prepending on a per-device basis.
 4. Refresh any open dashboard tabs (`Ctrl + R` or `Cmd + R`) to apply the new mode.
 
 ![Toggling the global opt out option in Settings -> Devices and Services -> Integration -> No Device Prefix](images/integration-global.png)
