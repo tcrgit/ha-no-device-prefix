@@ -2,29 +2,23 @@
 
 A lightweight frontend patch for Home Assistant **restoring shorter dashboard rows**,  displaying switches and sensor names as they appeared in `2026.10.4` and prior versions.
 
-This custom integration alters the entity display naming behavior introduced in `2026.11.0` by stripping the prepended device names from entity labels on dashboards, entity pickers, and More Info dialogs. This applies **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular sensor or switch entity. It primarily operates on legacy dashboard templates and has minimal affect on post `2026.2` Home Dashboard templates (although it does fix the Favorites row).
+This custom integration alters the entity display naming behavior introduced in `2026.11.0` (which now prepends the device name to the entity name) by stripping out the `2026.11.0` prepended device names from the entity labels on dashboards, entity pickers, and More Info dialogs. (I.e., it **reverses** the change).
 
-Version 2.1 adds **per-device** and **Opt-Out** and **Opt-In** controls. As a plugin, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
+It works well on **both** to auto-generated dashboards/dashboard cards and to custom dashboard cards without an overriding `name:` field in the YAML for a particular sensor or switch entity. It primarily operates on those two types of dashboards; it has minimal affect on post `2026.2` Home Dashboard templates (although it does fix the Favorites row). Home Dashboard appears unaffected by this plugin, but it I have not yet tested it extensively against those templates.
+
+Version 2.1 adds **per-device** and **Opt-Out** / **Opt-In** controls. As it is currently a non-standard custom integration, it defaults to **Opt-Out mode**—all entities with their own sub-name have their prepended device name stripped automatically. **This keep-or-omit behavior can be changed per device or globally.** *(Note: If Home Assistant developers ever consider integrating something like this into HA Core, it would likely need to be an Opt-In feature.)*
 
 ---
 
-## Why This Exists and What This Fixes
+## Why This Exists and What This Fixes (Illustrated)
 
-Home Assistant `2026.11.0` (`frontend#54727` / `frontend#55664`) removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multisensor devices:
+Home Assistant `2026.11.0` removed automatic prefix stripping in device entity display contexts, causing long, truncated labels on multisensor devices:
 * **The new `2026.11` behavior:** `GW1000_Pro Indoor Temperatur...`, `GW1000_Pro Indoor Humidity`
 * **After No Device Prefix installed:** `Indoor Temperature`, `Indoor Humidity`
 
 | Before (`2026.11` Default) | After (`No Device Prefix`) |
 | :---: | :---: |
 | ![Before](images/Ecowitt_11.x_small.png) | ![After](images/Ecowitt_plugin_small.png) |
-
----
-
-## How It Works
-
-* **Presentation-Layer Only:** Intercepts `hass.entities` and `hass.states` in the browser and Companion App; underlying `entity_id`s, SQLite history, and automations remain untouched.
-* **Primary-Entity Guard:** Primary or standalone entities whose name *is* the device itself (where the entity has no separate sub-name) retain their device name to prevent generic labels like `Switch` or `Light`.
-* **Custom Entity Names Preserved:** Entities you have explicitly renamed in the GUI keep their custom names as-is—unless the custom name literally starts with the device name, in which case that redundant prefix is still stripped.
 
 ---
 
@@ -73,6 +67,15 @@ Upon installation, the integration automatically creates two device labels under
 Whenever you first install the integration or update to a new version, clear your client cache so the new JavaScript module loads:
 * **Desktop Browser:** Hard-refresh the page (`Ctrl + Shift + R` on Windows/Linux, `Cmd + Shift + R` on Mac).
 * **iOS / Android Companion App:** Go to **Settings > Companion App > Debugging > Reset frontend cache**, then force-close and reopen the app.
+
+---
+
+## How It Works
+
+* **Presentation-Layer Only:** Intercepts `hass.entities` and `hass.states` in the browser and Companion App; underlying `entity_id`s, SQLite history, and automations remain untouched.
+* **Primary-Entity Guard:** Primary or standalone entities whose name *is* the device itself (where the entity has no separate sub-name) retain their device name to prevent generic labels like `Switch` or `Light`.
+* **Custom Entity Names Preserved:** Entities you have explicitly renamed in the GUI keep their custom names as-is-unless the custom name literally starts with the device name, in which case that redundant prefix is still stripped.
+* **Github tracking Indices:** This reverses the HA github issue that was marked as resolved and was incorporated into `the 2026.11.0` release in [`frontend#54727`] (https://github.com/home-assistant/frontend/pull/54727). (See also the curt **we-intended-to-do-this-to-your-dashboard-names** response closing `frontend#55664`).
 
 ---
 
